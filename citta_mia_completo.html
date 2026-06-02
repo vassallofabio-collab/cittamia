@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Città Mia - Ventimiglia</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        /* --- VARIABILI DESIGN SYSTEM PALETTE FPM --- */
+        :root {
+            --bg-dark: #08090c;
+            --bg-card: rgba(255, 255, 255, 0.03);
+            --border-glow: rgba(255, 255, 255, 0.08);
+            --text-primary: #ffffff;
+            --text-secondary: #8a8f98;
+            
+            /* Colori esatti del logo FPM */
+            --color-fpm-pink: #EC008C;
+            --color-fpm-blue: #00AEEF;
+            --color-fpm-orange: #F7941D;
+            
+            --gradient-primary: linear-gradient(135deg, var(--color-fpm-blue) 0%, var(--color-fpm-pink) 100%);
+            --gradient-neon: linear-gradient(135deg, var(--color-fpm-pink) 0%, var(--color-fpm-orange) 100%);
+            --gradient-full: linear-gradient(45deg, var(--color-fpm-blue), var(--color-fpm-pink), var(--color-fpm-orange));
+            
+            --shadow-neon: 0 0 20px rgba(0, 174, 239, 0.3);
+        }
+
+        /* --- SETUP GENERALE --- */
+        * { 
+            margin: 0; 
+            padding: 0; 
+            box-sizing: border-box; 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+        }
+        
+        html { 
+            scroll-behavior: smooth; 
+            background-color: var(--bg-dark); 
+        }
+        
+        body { 
+            color: var(--text-primary); 
+            min-height: 100vh; 
+            overflow-x: hidden; 
+            background-image: 
+                radial-gradient(circle at 5% 10%, rgba(0, 174, 239, 0.08) 0%, transparent 35%),
+                radial-gradient(circle at 95% 90%, rgba(236, 0, 140, 0.08) 0%, transparent 35%);
+            background-attachment: fixed;
+        }
+
+        /* --- NAVBAR GLASSMORPHISM --- */
+        header {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 92%;
+            max-width: 1200px;
+            padding: 14px 28px;
+            background: rgba(8, 9, 12, 0.7);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            border: 1px solid var(--border-glow);
+            border-radius: 100px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 1000;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+
+        .logo-nav { 
+            font-weight: 800; 
+            font-size: 1.4rem; 
+            display: flex; 
+            gap: 3px; 
+            letter-spacing: -0.5px;
+        }
+        .logo-nav span:nth-child(1) { color: var(--color-fpm-pink); }
+        .logo-nav span:nth-child(2) { color: var(--color-fpm-blue); }
+        .logo-nav span:nth-child(3) { color: var(--color-fpm-orange); }
+
+        nav ul { display: flex; list-style: none; gap: 20px; }
+        nav a { 
+            color: var(--text-secondary); 
+            text-decoration: none; 
+            font-weight: 500; 
+            font-size: 0.9rem; 
+            transition: 0.3s ease; 
+        }
+        nav a:hover { color: var(--text-primary); }
+
+        /* --- SEZIONI --- */
+        section { 
+            padding: 120px 5% 80px 5%; 
+            max-width: 1200px; 
+            margin: 0 auto; 
+            display: flex; 
+            flex-direction: column; 
+            justify-content: center; 
+            min-height: 90vh; 
+        }
+        
+        #hero { 
+            text-align: center; 
+            align-items: center; 
+            min-height: 100vh;
+            justify-content: center;
+        }
+
+        /* Bordo Cool & Ridotto per il Logo Grande Caricato */
+        .hero-logo-box {
+            position: relative;
+            width: 180px;
+            height: auto;
+            margin: 30px auto;
+            padding: 10px;
+            background: #0c0e14;
+            border-radius: 24px;
+            z-index: 1;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.7);
+        }
+
+        /* Effetto di bordo a gradiente animato */
+        .hero-logo-box::before {
+            content: '';
+            position: absolute;
+            top: -3px; left: -3px; right: -3px; bottom: -3px;
+            background: var(--gradient-full);
+            border-radius: 27px;
+            z-index: -1;
+            filter: blur(4px);
+            transition: opacity 0.3s ease;
+        }
+        
+        .hero-logo-box:hover::before {
+            filter: blur(8px);
+        }
+
+        .hero-logo-box img { 
+            width: 100%; 
+            height: auto; 
+            border-radius: 16px; 
+            display: block; 
+            object-fit: contain;
+        }
+
+        .main-title { 
+            font-size: 4.8rem; 
+            font-weight: 800; 
+            line-height: 1; 
+            letter-spacing: -3px; 
+            margin-bottom: 15px; 
+        }
+        .main-subtitle-top { 
+            font-size: 1.2rem; 
+            font-weight: 600; 
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--text-secondary); 
+            margin-bottom: 10px; 
+        }
+        .gradient-text { 
+            background: var(--gradient-neon); 
+            -webkit-background-clip: text; 
+            -webkit-text-fill-color: transparent; 
+        }
+
+        /* --- CARD DESCRIZIONE PROGETTO --- */
+        .cool-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-glow);
+            padding: 48px;
+            border-radius: 32px;
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            position: relative;
+            overflow: hidden;
+            border-left: 4px solid var(--color-fpm-blue);
+        }
+        .cool-card p {
+            font-size: 1.2rem;
+            line-height: 1.8;
+            color: var(--text-secondary);
+        }
+        .cool-card strong {
+            color: var(--text-primary);
+        }
+
+        /* --- STRUTTURA A GRIGLIA ALTERNATA AUTOMATICA --- */
+        .split-grid {
+            display: grid;
+            grid-template-columns: 1.1fr 0.9fr;
+            gap: 64px;
+            align-items: center;
+            width: 100%;
+        }
+
+        /* Classe speciale per invertire l'ordine (Immagine a destra, testo a sinistra) */
+        .split-grid.reverse {
+            grid-template-columns: 0.9fr 1.1fr;
+        }
+        .split-grid.reverse .img-container {
+            grid-column: 2;
+        }
+        .split-grid.reverse .content-box {
+            grid-column: 1;
+            grid-row: 1;
+            text-align: right;
+            align-items: flex-end;
+        }
+
+        .img-container {
+            position: relative;
+            border-radius: 28px;
+            overflow: hidden;
+            border: 1px solid var(--border-glow);
+            aspect-ratio: 16 / 10;
+            box-shadow: 0 30px 60px rgba(0,0,0,0.5);
+        }
+        .img-container img { 
+            width: 100%; 
+            height: 100%; 
+            object-fit: cover; 
+            transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1); 
+        }
+        .img-container:hover img { 
+            transform: scale(1.05); 
+        }
+        
+        /* Luce soffusa ambientale sotto l'immagine basata sul gradiente */
+        .img-container::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(to top, rgba(8, 9, 12, 0.2), transparent);
+            pointer-events: none;
+        }
+
+        .content-box { 
+            display: flex; 
+            flex-direction: column; 
+            align-items: flex-start;
+            gap: 16px;
+        }
+        .section-tag { 
+            font-size: 0.85rem; 
+            font-weight: 700; 
+            text-transform: uppercase; 
+            color: var(--color-fpm-blue); 
+            letter-spacing: 2px; 
+        }
+        .section-title { 
+            font-size: 2.6rem; 
+            font-weight: 800; 
+            line-height: 1.1; 
+            letter-spacing: -1px;
+        }
+        .section-desc { 
+            color: var(--text-secondary); 
+            line-height: 1.6; 
+            font-size: 1.1rem; 
+        }
+        .author-tag {
+            font-size: 0.9rem;
+            color: var(--color-fpm-orange);
+            font-weight: 600;
+        }
+
+        /* --- BOTTONI --- */
+        .cta-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 16px 36px;
+            background: var(--gradient-primary);
+            color: #000;
+            font-weight: 700;
+            font-size: 1rem;
+            text-decoration: none;
+            border-radius: 100px;
+            transition: all 0.3s ease;
+            box-shadow: var(--shadow-neon);
+        }
+        .cta-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 35px rgba(0, 174, 239, 0.5);
+        }
+
+        .outline-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 28px;
+            background: transparent;
+            color: var(--text-primary);
+            font-weight: 600;
+            text-decoration: none;
+            border-radius: 100px;
+            border: 1px solid var(--border-glow);
+            transition: all 0.3s ease;
+            font-size: 0.95rem;
+        }
+        .outline-btn:hover {
+            background: rgba(255, 255, 255, 0.03);
+            border-color: var(--color-fpm-pink);
+            transform: translateY(-2px);
+        }
+
+        /* --- FOOTER --- */
+        footer {
+            text-align: center;
+            padding: 60px 0;
+            font-size: 0.9rem;
+            color: rgba(255,255,255,0.25);
+            border-top: 1px solid var(--border-glow);
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 90%;
+        }
+
+        /* --- RESPONSIVE LAYOUT --- */
+        @media (max-width: 992px) {
+            .main-title { font-size: 3.5rem; }
+            .split-grid, .split-grid.reverse { grid-template-columns: 1fr; gap: 40px; }
+            .split-grid.reverse .img-container { grid-column: 1; }
+            .content-box, .split-grid.reverse .content-box { text-align: left; align-items: flex-start; }
+            .img-container { aspect-ratio: 16 / 9; }
+        }
+
+        @media (max-width: 768px) {
+            header { padding: 12px 24px; }
+            nav ul { display: none; } /* Ottimizzazione mobile minimal */
+            .main-title { font-size: 2.8rem; }
+            .section-title { font-size: 2.2rem; }
+            .cool-card { padding: 32px; }
+            section { padding: 100px 24px 60px 24px; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- BARRA DI NAVIGAZIONE CON EFFETTO SFOCO -->
+    <header>
+        <div class="logo-nav"><span>F</span><span>P</span><span>M</span></div>
+        <nav>
+            <ul>
+                <li><a href="#hero">Home</a></li>
+                <li><a href="#progetto">Il Progetto</a></li>
+                <li><a href="#sezione-1">Teatro Romano</a></li>
+                <li><a href="#sezione-2">I Monumenti</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <!-- INTRO/HERO CON LOGO PICCOLO E BORDO NEON -->
+    <section id="hero">
+        <p class="main-subtitle-top">Progetto Didattico · Classe 1° Q</p>
+        <h1 class="main-title">Città <span class="gradient-text">Mia</span></h1>
+        
+        <!-- BOX DEL LOGO DA TE CARICATO (Rimpicciolito con bordo FPM) -->
+        <div class="hero-logo-box">
+            <img src="logoweb.png" alt="Logo Web Community Manager">
+        </div>
+
+        <p style="color: var(--text-secondary); max-width: 700px; margin: 0 auto 32px; font-size: 1.1rem; line-height: 1.6;">
+            Indirizzo Web Community Manager - Plesso Marco Polo. Un percorso interattivo alla scoperta e valorizzazione delle meraviglie storico-culturali di Ventimiglia.
+        </p>
+        <a href="#progetto" class="cta-btn">Esplora il Territorio</a>
+    </section>
+
+    <!-- DESCRIZIONE PROGETTO -->
+    <section id="progetto">
+        <div style="margin-bottom: 32px;">
+            <span class="section-tag">Presentazione</span>
+            <h2 class="section-title">Turismo Accessibile</h2>
+        </div>
+        <div class="cool-card">
+            <p>Il nostro obiettivo primario consiste nell'analizzare e comprendere a fondo il territorio cittadino attraverso la sua ricca evoluzione storica, spaziando dall'era di <strong>Cro Magnon fino al Medioevo</strong>. Ci focalizziamo sulla promozione attiva del patrimonio archeologico di Albintimilium e del centro storico, esaltando con passione le testimonianze dell'epoca romana e medievale.</p>
+        </div>
+    </section>
+
+    <!-- SEZIONE 1: TEATRO ROMANO (IMMAGINE SX / LINK DX) -->
+    <section id="sezione-1">
+        <div class="split-grid">
+            <div class="img-container">
+                <img src="https://images.unsplash.com/photo-1552832230-c0197dd311b5?q=80&w=1200&auto=format&fit=crop" alt="Teatro Romano di Ventimiglia">
+            </div>
+            <div class="content-box">
+                <span class="section-tag">Monumento 01</span>
+                <h2 class="section-title">Teatro Romano</h2>
+                <p class="section-desc">Uno dei monumenti storici e archeologici più rilevanti dell'antica Albintimilium, preziosa testimonianza risalente a cavallo tra il II e il III secolo d.C.</p>
+                <span class="author-tag">A cura di: Houssam Marini, Beraldo Dajko</span>
+                <a href="https://www.canva.com/design/DAG5VORakoY/_HF3-V_RVo7zeRhySFe44Q/view" target="_blank" class="outline-btn">
+                    Apri Documento Canva ↗
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- SEZIONE 2: GIARDINI BOTANICI HANBURY (IMMAGINE DX / LINK SX) -->
+    <section id="sezione-2">
+        <div class="split-grid reverse">
+            <div class="img-container">
+                <img src="https://images.unsplash.com/photo-1585320806297-9794b3e4eeae?q=80&w=1200&auto=format&fit=crop" alt="Giardini Hanbury">
+            </div>
+            <div class="content-box">
+                <span class="section-tag">Monumento 02</span>
+                <h2 class="section-title">Giardini Hanbury</h2>
+                <p class="section-desc">Celeberrimo parco botanico situato sul promontorio della Mortola. Raccoglie migliaia di specie botaniche esotiche provenienti da ogni angolo del mondo.</p>
+                <span class="author-tag">Sezione in Aggiornamento</span>
+                <a href="#" class="outline-btn">Esplora Risorse</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- SEZIONE 3: BALZI ROSSI (IMMAGINE SX / LINK DX) -->
+    <section id="sezione-3">
+        <div class="split-grid">
+            <div class="img-container">
+                <img src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?q=80&w=1200&auto=format&fit=crop" alt="Balzi Rossi">
+            </div>
+            <div class="content-box">
+                <span class="section-tag">Monumento 03</span>
+                <h2 class="section-title">I Balzi Rossi</h2>
+                <p class="section-desc">Sito archeologico preistorico di fama mondiale a ridosso del confine di Stato. Le caverne calcaree hanno restituito reperti fondamentali del Paleolitico.</p>
+                <a href="#" class="outline-btn">Visualizza Ricerca</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- SEZIONE 4: CATTEDRALE DI SANTA MARIA ASSUNTA (IMMAGINE DX / LINK SX) -->
+    <section id="sezione-4">
+        <div class="split-grid reverse">
+            <div class="img-container">
+                <img src="https://images.unsplash.com/photo-1601574961159-002f2cc960f8?q=80&w=1200&auto=format&fit=crop" alt="Cattedrale di Ventimiglia">
+            </div>
+            <div class="content-box">
+                <span class="section-tag">Monumento 04</span>
+                <h2 class="section-title">Cattedrale dell'Assunta</h2>
+                <p class="section-desc">Il cuore spirituale e architettonico della città alta. Uno spettacolare esempio di architettura romanica che domina l'intero borgo antico.</p>
+                <a href="#" class="outline-btn">Scopri la Storia</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- SEZIONE 5: FORTE DELL'ANNUNZIATA (IMMAGINE SX / LINK DX) -->
+    <section id="sezione-5">
+        <div class="split-grid">
+            <div class="img-container">
+                <img src="https://images.unsplash.com/photo-1599946347371-68eb71b16afc?q=80&w=1200&auto=format&fit=crop" alt="Forte Annunziata">
+            </div>
+            <div class="content-box">
+                <span class="section-tag">Monumento 05</span>
+                <h2 class="section-title">Forte dell'Annunziata</h2>
+                <p class="section-desc">Fortezza ottocentesca arroccata a strapiombo sulla costa, oggi sede del rinomato Museo Civico Archeologico "Girolamo Rossi".</p>
+                <a href="#" class="outline-btn">Info e Orari</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- SEZIONE 6: PORTA CANARDA (IMMAGINE DX / LINK SX) -->
+    <section id="sezione-6">
+        <div class="split-grid reverse">
+            <div class="img-container">
+                <img src="https://images.unsplash.com/photo-1548702038-8fa3413be472?q=80&w=1200&auto=format&fit=crop" alt="Porta Canarda">
+            </div>
+            <div class="content-box">
+                <span class="section-tag">Monumento 06</span>
+                <h2 class="section-title">Porta Canarda</h2>
+                <p class="section-desc">Un'antica torre-porta medievale a doppia arcata che attraversa la suggestiva e storica via Julia Augusta.</p>
+                <a href="#" class="outline-btn">Dettagli Struttura</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- SEZIONE 7: AREA ARCHEOLOGICA ALBINTIMILIUM (IMMAGINE SX / LINK DX) -->
+    <section id="sezione-7">
+        <div class="split-grid">
+            <div class="img-container">
+                <img src="https://images.unsplash.com/photo-1569336415962-a4bd9f69cd83?q=80&w=1200&auto=format&fit=crop" alt="Scavi Albintimilium">
+            </div>
+            <div class="content-box">
+                <span class="section-tag">Monumento 07</span>
+                <h2 class="section-title">Scavi di Albintimilium</h2>
+                <p class="section-desc">L'area archeologica della città romana, che conserva oltre al teatro anche antichi complessi termali, insule e porzioni di mura.</p>
+                <a href="#" class="outline-btn">Mappa degli Scavi</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- SEZIONE 8: CHIESA DI SAN MICHELE ARCANGELO (IMMAGINE DX / LINK SX) -->
+    <section id="sezione-8">
+        <div class="split-grid reverse">
+            <div class="img-container">
+                <img src="https://images.unsplash.com/photo-1548625361-155deee223d2?q=80&w=1200&auto=format&fit=crop" alt="Chiesa San Michele">
+            </div>
+            <div class="content-box">
+                <span class="section-tag">Monumento 08</span>
+                <h2 class="section-title">San Michele Arcangelo</h2>
+                <p class="section-desc">Luogo di culto dell'XI secolo edificato sui resti di un antico tempio pagano, celebre per le colonne realizzate riutilizzando pietre miliari romane.</p>
+                <a href="#" class="outline-btn">Approfondisci</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- SEZIONE 9: SPIAGGIA DELLE CALANDRE (IMMAGINE SX / LINK DX) -->
+    <section id="sezione-9">
+        <div class="split-grid">
+            <div class="img-container">
+                <img src="https://images.unsplash.com/photo-1519046904884-53103b34b206?q=80&w=1200&auto=format&fit=crop" alt="Spiaggia delle Calandre">
+            </div>
+            <div class="content-box">
+                <span class="section-tag">Luogo Naturale 09</span>
+                <h2 class="section-title">Le Calandre</h2>
+                <p class="section-desc">Una splendida oasi naturale caratterizzata da sabbia finissima e acque cristalline, raggiungibile tramite un suggestivo sentiero a picco sul mare.</p>
+                <a href="#" class="outline-btn">Guida al Sentiero</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- SEZIONE 10: CENTRO STORICO VENTIMIGLIA ALTA (IMMAGINE DX / LINK SX) -->
+    <section id="sezione-10">
+        <div class="split-grid reverse">
+            <div class="img-container">
+                <img src="https://images.unsplash.com/photo-1528127269322-539801943592?q=80&w=1200&auto=format&fit=crop" alt="Ventimiglia Alta">
+            </div>
+            <div class="content-box">
+                <span class="section-tag">Borgo Antico 10</span>
+                <h2 class="section-title">Ventimiglia Alta</h2>
+                <p class="section-desc">Uno scrigno medievale intatto, strutturato in carruggi, piazzette storiche, imponenti fortificazioni e antichi palazzi nobiliari liguri.</p>
+                <a href="#" class="outline-btn">Mappa Interattiva</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- FOOTER CON COPYRIGHT -->
+    <footer>
+        <p>&copy; 2026 Città Mia · Plesso Marco Polo · Web Community Manager. Tutti i diritti riservati.</p>
+    </footer>
+
+</body>
+</html>
