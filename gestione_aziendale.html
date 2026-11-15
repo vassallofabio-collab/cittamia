@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Verifica interattiva – La gestione aziendale</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+:root{
+  --bg:#f4f1ea; --card:#fffdf8; --ink:#1f2a37; --muted:#5d6876; --line:#d9d2c3;
+  --accent:#1d4e89; --accent-soft:#e3ecf7; --ok:#1a7a4c; --ok-soft:#e2f3ea;
+  --ko:#b3261e; --ko-soft:#fbe9e7; --warn:#9a6700; --warn-soft:#fff4d6;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 Georgia,"Times New Roman",serif}
+.wrap{max-width:920px;margin:0 auto;padding:24px 16px 64px}
+header h1{font-size:1.7rem;margin:0 0 2px;letter-spacing:.2px}
+header p{margin:0;color:var(--muted);font-family:system-ui,sans-serif;font-size:.9rem}
+.steps{display:flex;flex-wrap:wrap;gap:6px;margin:18px 0 6px;font-family:system-ui,sans-serif}
+.steps button{border:1px solid var(--line);background:var(--card);color:var(--muted);border-radius:999px;
+  padding:5px 12px;font-size:.8rem;cursor:pointer}
+.steps button[disabled]{opacity:.5;cursor:default}
+.steps button.cur{border-color:var(--accent);color:var(--accent);font-weight:700;background:var(--accent-soft)}
+.steps button.done{color:var(--ok);border-color:var(--ok)}
+.steps button.done.part{color:var(--warn);border-color:var(--warn)}
+.bar{height:6px;background:var(--line);border-radius:3px;overflow:hidden;margin-bottom:18px}
+.bar i{display:block;height:100%;background:var(--accent);width:0;transition:width .3s}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:22px;box-shadow:0 1px 2px rgba(0,0,0,.04)}
+.card h2{margin:0 0 4px;font-size:1.3rem}
+.card .pts{font-family:system-ui,sans-serif;font-size:.8rem;color:var(--muted);margin-bottom:10px}
+.istr{background:var(--accent-soft);border-left:4px solid var(--accent);padding:10px 14px;border-radius:4px;margin:10px 0 16px;font-size:.95rem}
+h3{font-size:1.02rem;margin:22px 0 8px;border-bottom:1px solid var(--line);padding-bottom:4px}
+.legend{font-family:system-ui,sans-serif;font-size:.85rem;color:var(--muted);margin:0 0 10px}
+.defs{columns:2;column-gap:24px;font-size:.92rem;padding:0;margin:0 0 14px;list-style:none}
+.defs li{break-inside:avoid;margin-bottom:6px}
+.defs b{color:var(--accent);font-family:system-ui,sans-serif}
+.row{display:grid;grid-template-columns:1fr auto;gap:8px 14px;align-items:center;padding:9px 8px;border-bottom:1px dashed var(--line);border-radius:6px}
+.row .q{min-width:0}
+.row .n{font-family:system-ui,sans-serif;font-weight:700;color:var(--accent);margin-right:6px}
+.row.ok{background:var(--ok-soft)} .row.ko{background:var(--ko-soft)}
+.row .fb{grid-column:1/-1;font-family:system-ui,sans-serif;font-size:.84rem}
+.row.ok .fb{color:var(--ok)} .row.ko .fb{color:var(--ko)}
+.pills{display:flex;flex-wrap:wrap;gap:6px;font-family:system-ui,sans-serif}
+.pills label{position:relative;cursor:pointer}
+.pills input{position:absolute;opacity:0;inset:0;margin:0;cursor:pointer}
+.pills span{display:block;border:1px solid var(--line);background:#fff;border-radius:6px;padding:5px 11px;font-size:.85rem;min-width:36px;text-align:center}
+.pills input:checked+span{background:var(--accent);border-color:var(--accent);color:#fff}
+.pills input:focus-visible+span{outline:2px solid var(--accent);outline-offset:2px}
+.pills input:disabled+span{opacity:.75;cursor:default}
+select,input[type=text]{font:inherit;font-family:system-ui,sans-serif;font-size:.9rem;padding:6px 8px;border:1px solid var(--line);border-radius:6px;background:#fff;color:var(--ink);max-width:100%}
+input.num{width:130px;text-align:right}
+.amt{font-family:system-ui,sans-serif;color:var(--muted);font-size:.88rem;margin-left:8px;white-space:nowrap}
+.data{background:#fff;border:1px solid var(--line);border-radius:6px;padding:10px 14px;font-size:.93rem;margin-bottom:8px}
+.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:20px;font-family:system-ui,sans-serif}
+.btn{border:0;border-radius:8px;padding:10px 18px;font-size:.95rem;font-weight:600;cursor:pointer;background:var(--accent);color:#fff}
+.btn.sec{background:#fff;color:var(--accent);border:1px solid var(--accent)}
+.btn:disabled{opacity:.45;cursor:default}
+.result{margin-top:20px;border-radius:8px;padding:14px 16px;border:1px solid;font-family:system-ui,sans-serif;font-size:.92rem}
+.result.full{background:var(--ok-soft);border-color:var(--ok)}
+.result.part{background:var(--warn-soft);border-color:var(--warn)}
+.result.bad{background:var(--ko-soft);border-color:var(--ko)}
+.result h4{margin:0 0 6px;font-size:1.05rem}
+.result ul{margin:8px 0 0;padding-left:20px}
+.result li{margin-bottom:6px}
+.result .y{color:var(--ko)} .result .c{color:var(--ok);font-weight:600}
+.result .why{color:var(--muted);display:block}
+.final .vote{display:flex;align-items:center;gap:20px;flex-wrap:wrap;margin:14px 0}
+.final .big{font-size:3.4rem;font-weight:700;line-height:1;color:var(--accent);font-family:system-ui,sans-serif}
+.final .big small{font-size:1.2rem;color:var(--muted)}
+table{border-collapse:collapse;width:100%;font-family:system-ui,sans-serif;font-size:.9rem;margin-top:10px}
+th,td{border-bottom:1px solid var(--line);padding:7px 8px;text-align:left}
+td.r,th.r{text-align:right}
+.tag{display:inline-block;border-radius:999px;padding:2px 10px;font-size:.78rem;font-weight:600}
+.tag.full{background:var(--ok-soft);color:var(--ok)} .tag.part{background:var(--warn-soft);color:var(--warn)} .tag.bad{background:var(--ko-soft);color:var(--ko)}
+.row.stack{grid-template-columns:1fr}
+.prosp{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:6px}
+.pcol{background:#fff;border:1px solid var(--line);border-radius:8px;padding:10px 12px}
+.ptit{font-family:system-ui,sans-serif;font-weight:700;font-size:.85rem;letter-spacing:.5px;color:var(--accent);border-bottom:2px solid var(--accent);padding-bottom:4px;margin-bottom:6px;text-transform:uppercase}
+.pgrp{font-family:system-ui,sans-serif;font-size:.86rem;margin:8px 0 4px}
+.pgrp ul{list-style:none;margin:3px 0 0;padding:0}
+.pgrp li{display:flex;justify-content:space-between;gap:10px;padding:2px 0 2px 10px;border-bottom:1px dotted var(--line)}
+.pgrp li.empty{color:var(--muted);font-style:italic;border:0}
+.prosp .row{padding:7px 4px;font-weight:600;font-size:.93rem}
+.prosp input.num{width:110px}
+.pnote{font-family:system-ui,sans-serif;font-size:.84rem;color:var(--muted);margin:0 0 6px}
+#pdfmsg{font-family:system-ui,sans-serif;font-size:.88rem;margin-top:10px;color:var(--muted)}
+.hide{display:none}
+.name{margin-top:12px;font-family:system-ui,sans-serif;font-size:.9rem}
+@media (max-width:640px){.prosp{grid-template-columns:1fr}.row{grid-template-columns:1fr}.defs{columns:1}.card{padding:16px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <h1>La gestione aziendale</h1>
+  <p>Verifica interattiva · Economia aziendale · Biennio</p>
+  <div class="name"><label>Studente: <input type="text" id="stud" placeholder="Nome e cognome" autocomplete="off"></label></div>
+</header>
+<nav class="steps" id="steps" aria-label="Esercizi"></nav>
+<div class="bar"><i id="bar"></i></div>
+<main id="main"></main>
+</div>
+
+<script>
+const VF=['Vero','Falso'];
+const FIPD=['F','I','P','D'];
+const SP_CAT=['Immobilizzazioni immateriali','Immobilizzazioni materiali','Attivo circolante','Passività'];
+const SE_CAT=['Costi operativi','Costi finanziari','Costi fiscali','Ricavi operativi','Ricavi finanziari'];
+const LET=['a','b','c','d','e','f','g','h','i','l'];
+
+const EX=[
+{short:'Correlazione',title:'Esercizio 1 – Correlazione',
+ istr:'Associa a ogni termine la lettera della definizione corrispondente. Ogni lettera può essere usata una sola volta: quando la scegli, non è più disponibile per gli altri termini.',
+ secs:[{type:'select',uniq:true,opts:LET,
+  pre:`<ul class="defs">
+  <li><b>a.</b> Trasformazione dei fattori produttivi in prodotti finiti</li>
+  <li><b>b.</b> Debiti sorti verso banche o altri finanziatori per prestiti ottenuti</li>
+  <li><b>c.</b> Differenza tra il totale delle attività e il totale delle passività</li>
+  <li><b>d.</b> Acquisto dei fattori produttivi necessari all’attività</li>
+  <li><b>e.</b> Beni utilizzati nell’impresa per più anni</li>
+  <li><b>f.</b> Raccolta dei mezzi monetari necessari all’impresa</li>
+  <li><b>g.</b> Vendita di merci e prodotti con rientro di mezzi monetari</li>
+  <li><b>h.</b> Differenza tra i ricavi e i costi dell’esercizio</li>
+  <li><b>i.</b> Debiti verso fornitori per acquisti con pagamento dilazionato</li>
+  <li><b>l.</b> Mezzi apportati dall’imprenditore o dai soci e utili reinvestiti</li></ul>`,
+  rows:[
+   {q:'Finanziamento',a:'f'},{q:'Investimento',a:'d'},{q:'Produzione',a:'a'},{q:'Disinvestimento',a:'g'},
+   {q:'Capitale proprio',a:'l'},{q:'Debiti finanziari',a:'b'},{q:'Debiti commerciali',a:'i'},
+   {q:'Beni durevoli',a:'e'},{q:'Patrimonio netto',a:'c'},{q:'Reddito d’esercizio',a:'h'}]}]},
+
+{short:'Vero o falso',title:'Esercizio 2 – Vero o falso',
+ istr:'Indica se le seguenti affermazioni sono vere o false.',
+ secs:[{type:'pills',opts:VF,rows:[
+  {q:'Le operazioni di gestione si distinguono in interne ed esterne.',a:'Vero'},
+  {q:'I finanziamenti procurano all’impresa i mezzi monetari necessari per effettuare gli investimenti.',a:'Vero'},
+  {q:'I debiti verso fornitori sono debiti finanziari.',a:'Falso',why:'Sono debiti commerciali (di regolamento).'},
+  {q:'Gli utili reinvestiti nell’impresa fanno parte del capitale proprio.',a:'Vero'},
+  {q:'Le materie prime sono beni durevoli.',a:'Falso',why:'Sono beni di breve durata: si consumano in un solo ciclo produttivo.'},
+  {q:'La vendita di prodotti è un’operazione di disinvestimento.',a:'Vero'},
+  {q:'Il patrimonio netto è la somma di attività e passività.',a:'Falso',why:'Patrimonio netto = attività − passività.'},
+  {q:'Gli interessi passivi bancari sono costi operativi.',a:'Falso',why:'Sono costi finanziari.'},
+  {q:'Se i ricavi superano i costi l’impresa consegue un utile d’esercizio.',a:'Vero'},
+  {q:'La Situazione patrimoniale espone i costi e i ricavi dell’esercizio.',a:'Falso',why:'Costi e ricavi sono esposti nella Situazione economica.'}]}]},
+
+{short:'Caccia all’errore',title:'Esercizio 3 – Caccia all’errore',
+ istr:'In ogni frase scegli l’alternativa corretta tra le due proposte.',
+ secs:[{type:'pills',rows:[
+  {q:'La trasformazione di materie prime in prodotti finiti è un’operazione … di gestione.',opts:['interna','esterna'],a:'interna'},
+  {q:'Le operazioni di disinvestimento consistono … di merci e prodotti.',opts:['nella vendita','nell’acquisto'],a:'nella vendita'},
+  {q:'I debiti per l’acquisto di fattori produttivi con pagamento dilazionato sono definiti …',opts:['finanziari','commerciali'],a:'commerciali'},
+  {q:'L’apporto di capitale da parte dell’imprenditore rappresenta un …',opts:['finanziamento di capitale proprio','autofinanziamento'],a:'finanziamento di capitale proprio',why:'L’autofinanziamento deriva invece dagli utili non prelevati.'},
+  {q:'Un bene è considerato durevole in base alla sua …',opts:['natura','destinazione d’uso'],a:'destinazione d’uso'},
+  {q:'La … attivo immobilizzato e attivo circolante costituisce il totale attività.',opts:['sottrazione fra','somma di'],a:'somma di'},
+  {q:'Il patrimonio netto si calcola … i debiti al totale attività.',opts:['aggiungendo','sottraendo'],a:'sottraendo'},
+  {q:'I ricavi costituiscono un componente … del reddito aziendale.',opts:['positivo','negativo'],a:'positivo'},
+  {q:'I costi per il godimento di beni di terzi sono di tipo …',opts:['operativo','finanziario'],a:'operativo'},
+  {q:'L’ammortamento di un bene durevole è un costo …',opts:['finanziario','operativo'],a:'operativo'}]}]},
+
+{short:'Completamento 1',title:'Esercizio 4 – Completamento 1',
+ istr:'Un’impresa produce articoli in cartone per ufficio. Per ogni operazione indica di quale tipo si tratta. Attenzione: alcune operazioni appartengono a due tipi contemporaneamente.',
+ secs:[{type:'pills',multi:true,opts:FIPD,
+  pre:'<p class="legend"><b>F</b> = finanziamento · <b>I</b> = investimento · <b>P</b> = produzione · <b>D</b> = disinvestimento</p>',
+  rows:[
+  {q:'Prodotti 2.000 raccoglitori ad anelli in cartone',a:['P']},
+  {q:'Vendute 5.000 cartelle a tre lembi',a:['D']},
+  {q:'Acquistata taglierina professionale, pagamento a 60 giorni a mezzo bonifico bancario',a:['F','I'],why:'L’acquisto è un investimento; la dilazione di pagamento è un finanziamento (debito commerciale).'},
+  {q:'Ottenuto un prestito bancario per l’ampliamento del reparto produzione',a:['F']},
+  {q:'Prodotte 10.000 scatole per archiviazione in cartone',a:['P']},
+  {q:'Acquistati cartoni per imballaggio, regolamento a 60 giorni',a:['F','I'],why:'L’acquisto è un investimento; la dilazione di pagamento è un finanziamento (debito commerciale).'},
+  {q:'Pagati gli stipendi ai dipendenti',a:['I'],why:'L’acquisizione del fattore lavoro è un investimento.'},
+  {q:'Acquistato software antivirus, regolamento immediato',a:['I']},
+  {q:'Vendute 2.000 scatole per archiviazione',a:['D']},
+  {q:'Pagate provvigioni agli agenti di commercio',a:['I'],why:'L’acquisizione di servizi è un investimento.'},
+  {q:'Reinvestita una quota dell’utile dell’esercizio precedente',a:['F'],why:'È autofinanziamento (capitale proprio).'},
+  {q:'Acquistate 100 risme di carta per fotocopiatrice, regolamento per pronta cassa',a:['I']},
+  {q:'Ampliata la società con ingresso di un nuovo socio che ha versato la sua quota sul conto corrente bancario',a:['F']},
+  {q:'Pagata la fattura dei consumi di energia elettrica',a:['I']}]}]},
+
+{short:'Completamento 2',title:'Esercizio 5 – Completamento 2',
+ istr:'Classifica le operazioni di finanziamento e di investimento dell’esercizio precedente.',
+ secs:[
+ {type:'pills',head:'a. Operazioni di finanziamento',opts:['CP','DC','DF'],
+  pre:'<p class="legend"><b>CP</b> = capitale proprio · <b>DC</b> = debito commerciale · <b>DF</b> = debito finanziario</p>',
+  rows:[
+  {q:'Ottenuto un prestito bancario per l’ampliamento del reparto produzione',a:'DF'},
+  {q:'Reinvestita una quota degli utili dell’esercizio precedente',a:'CP'},
+  {q:'Acquistata taglierina professionale, pagamento a 60 giorni a mezzo bonifico bancario',a:'DC',why:'Il debito è verso il fornitore, non verso la banca.'},
+  {q:'Acquistati cartoni per imballaggio, regolamento a 60 giorni',a:'DC'},
+  {q:'Ampliata la società con ingresso di un nuovo socio che ha versato la sua quota sul conto corrente bancario',a:'CP'}]},
+ {type:'select',head:'b. Operazioni di investimento',
+  opts:['Bene durevole materiale','Bene durevole immateriale','Bene di breve durata','Servizi, prestazioni'],
+  rows:[
+  {q:'Acquistata taglierina professionale, pagamento a 60 giorni a mezzo bonifico bancario',a:'Bene durevole materiale'},
+  {q:'Acquistati cartoni per imballaggio, regolamento a 60 giorni',a:'Bene di breve durata'},
+  {q:'Pagati stipendi ai dipendenti',a:'Servizi, prestazioni'},
+  {q:'Acquistato software antivirus, regolamento immediato',a:'Bene durevole immateriale'},
+  {q:'Pagate provvigioni agli agenti di commercio',a:'Servizi, prestazioni'},
+  {q:'Acquistate 100 risme di carta per fotocopiatrice, regolamento per pronta cassa',a:'Bene di breve durata'},
+  {q:'Pagata la fattura dei consumi di energia elettrica',a:'Servizi, prestazioni'}]}]},
+
+{short:'Applicazione 1',title:'Esercizio 6 – Applicazione 1: capitale proprio e capitale di debito',
+ istr:'Leggi i dati e calcola gli importi richiesti (in euro, senza decimali).',
+ secs:[{type:'num',
+  pre:`<div class="data">Un’impresa presenta le seguenti fonti di finanziamento:<br>
+  • apporto del titolare per l’avvio dell’attività: <b>120.000 euro</b><br>
+  • utili reinvestiti in azienda: <b>22.000 euro</b><br>
+  • finanziamento bancario di <b>50.000 euro</b>, da rimborsare in 5 rate annuali costanti di 10.000 euro (la prima scade entro un anno)<br>
+  • debiti verso fornitori: <b>4.200 euro</b></div>`,
+  rows:[
+  {q:'Totale finanziamenti di capitale proprio',a:142000,why:'120.000 + 22.000'},
+  {q:'Debiti a medio/lungo termine',a:40000,why:'50.000 − 10.000 (rata in scadenza entro l’anno)'},
+  {q:'Debiti a breve termine',a:14200,why:'10.000 (rata entro l’anno) + 4.200 (fornitori)'},
+  {q:'Totale finanziamenti di capitale di debito',a:54200,why:'40.000 + 14.200'},
+  {q:'Totale dei finanziamenti',a:196200,why:'142.000 + 54.200'}]}]},
+
+{short:'Sit. patrimoniale',title:'Esercizio 7 – Applicazione 2a: Situazione patrimoniale',
+ istr:'<b>1.</b> Per ogni voce tocca la sezione a cui appartiene: il prospetto in basso si compila da solo. <b>2.</b> Scrivi i totali nelle caselle del prospetto. Il patrimonio netto si ottiene per differenza (totale attività − totale passività).',
+ secs:[
+ {type:'pills',stack:true,head:'1. Dove va ogni voce?',opts:SP_CAT,rows:[
+  {q:'Debiti verso fornitori',amt:44000,a:SP_CAT[3]},
+  {q:'Fabbricati',amt:500000,a:SP_CAT[1]},
+  {q:'Crediti verso clienti',amt:65000,a:SP_CAT[2]},
+  {q:'Licenze software',amt:12000,a:SP_CAT[0],why:'Bene durevole privo di consistenza fisica.'},
+  {q:'Debiti per TFR',amt:117000,a:SP_CAT[3]},
+  {q:'Automezzi',amt:50000,a:SP_CAT[1]},
+  {q:'Rimanenze di materie e prodotti',amt:76000,a:SP_CAT[2]},
+  {q:'Debiti verso banche a m/l termine',amt:180000,a:SP_CAT[3]},
+  {q:'Macchinari e attrezzature',amt:90000,a:SP_CAT[1]},
+  {q:'Disponibilità liquide',amt:22000,a:SP_CAT[2]},
+  {q:'Arredi',amt:20000,a:SP_CAT[1]},
+  {q:'Debiti verso banche a breve termine',amt:36000,a:SP_CAT[3]},
+  {q:'Apparecchiature elettroniche',amt:22000,a:SP_CAT[1]}]},
+ {type:'num',head:'2. Prospetto della Situazione patrimoniale',
+  prosp:{src:0,cols:[{title:'Attività',items:[{cat:0},{cat:1},{t:0},{t:1},{cat:2},{t:2},{t:3}]},
+                     {title:'Patrimonio netto e passività',items:[{t:5},{cat:3},{t:4},{t:6}]}]},rows:[
+  {q:'Totale immobilizzazioni materiali',a:682000,why:'500.000 + 90.000 + 50.000 + 20.000 + 22.000'},
+  {q:'Totale immobilizzazioni',a:694000,why:'12.000 + 682.000'},
+  {q:'Totale attivo circolante',a:163000,why:'76.000 + 65.000 + 22.000'},
+  {q:'Totale attività',a:857000,why:'694.000 + 163.000'},
+  {q:'Totale passività',a:377000,why:'117.000 + 180.000 + 36.000 + 44.000'},
+  {q:'Patrimonio netto',a:480000,why:'857.000 − 377.000'},
+  {q:'Totale netto e passività',a:857000,why:'480.000 + 377.000, uguale al totale attività'}]}]},
+
+{short:'Sit. economica',title:'Esercizio 8 – Applicazione 2b: Situazione economica',
+ istr:'<b>1.</b> Per ogni voce tocca il tipo di costo o di ricavo: il prospetto in basso si compila da solo. <b>2.</b> Scrivi nelle caselle il totale dei costi, il totale dei ricavi e l’utile (ricavi − costi).',
+ secs:[
+ {type:'pills',stack:true,head:'1. Che tipo di costo o ricavo è?',opts:SE_CAT,rows:[
+  {q:'Interessi passivi bancari',amt:8600,a:SE_CAT[1]},
+  {q:'Costi per il personale',amt:127200,a:SE_CAT[0]},
+  {q:'Ricavi per vendita di prodotti',amt:740000,a:SE_CAT[3]},
+  {q:'Imposte dell’esercizio',amt:18600,a:SE_CAT[2]},
+  {q:'Costi per consumi di materie',amt:462000,a:SE_CAT[0]},
+  {q:'Interessi attivi bancari',amt:900,a:SE_CAT[4]},
+  {q:'Ammortamento beni durevoli',amt:41000,a:SE_CAT[0],why:'È la quota di costo dei beni durevoli di competenza dell’esercizio.'},
+  {q:'Costi per servizi',amt:37300,a:SE_CAT[0]}]},
+ {type:'num',head:'2. Prospetto della Situazione economica',
+  prosp:{src:0,cols:[{title:'Costi',items:[{cat:0},{cat:1},{cat:2},{t:0},{t:2}]},
+                     {title:'Ricavi',items:[{cat:3},{cat:4},{t:1}]}]},rows:[
+  {q:'Totale costi',a:694700,why:'462.000 + 37.300 + 127.200 + 41.000 + 8.600 + 18.600'},
+  {q:'Totale ricavi',a:740900,why:'740.000 + 900'},
+  {q:'Utile d’esercizio',a:46200,why:'740.900 − 694.700'}]}]}
+];
+
+const eur=n=>n.toLocaleString('it-IT');
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const main=document.getElementById('main'), steps=document.getElementById('steps'), bar=document.getElementById('bar');
+let cur=0; const res=EX.map(()=>null);
+
+EX.forEach((ex,i)=>{
+  ex.max=ex.secs.reduce((s,x)=>s+x.rows.length,0);
+  const b=document.createElement('button'); b.type='button'; b.textContent=(i+1)+'. '+ex.short;
+  b.onclick=()=>show(i); steps.appendChild(b);
+  const c=document.createElement('section'); c.className='card hide'; c.id='ex'+i;
+  let h=`<h2>${ex.title}</h2><div class="pts">${ex.max} punti</div><div class="istr">${ex.istr}</div>`;
+  let n=0;
+  ex.secs.forEach((s,j)=>{
+    if(s.head) h+=`<h3>${s.head}</h3>`;
+    if(s.pre) h+=s.pre;
+    const rh=s.rows.map((r,k)=>{
+      n++; const id=`e${i}s${j}r${k}`; let ctl='';
+      const amt=r.amt!=null?`<span class="amt">${eur(r.amt)} €</span>`:'';
+      if(s.type==='pills'){
+        ctl='<div class="pills">'+(r.opts||s.opts).map(o=>`<label><input type="${s.multi?'checkbox':'radio'}" name="${id}" value="${esc(o)}"><span>${esc(o)}</span></label>`).join('')+'</div>';
+      }else if(s.type==='select'){
+        ctl=`<select name="${id}" aria-label="Risposta ${n}"><option value="">— scegli —</option>${s.opts.map(o=>`<option>${esc(o)}</option>`).join('')}</select>`;
+      }else{
+        ctl=`<span><input class="num" type="text" inputmode="numeric" name="${id}" aria-label="${esc(r.q)}" placeholder="0"> €</span>`;
+      }
+      return `<div class="row${s.stack?' stack':''}" id="${id}"><div class="q">${s.prosp?'':`<span class="n">${n}.</span>`}${r.q}${amt}</div>${ctl}<div class="fb hide"></div></div>`;
+    });
+    if(s.prosp){
+      const src=ex.secs[s.prosp.src];
+      h+=`<p class="pnote" id="pn${i}">Le voci compaiono qui man mano che le classifichi.</p><div class="prosp">`+s.prosp.cols.map(c=>`<div class="pcol"><div class="ptit">${c.title}</div>`+
+        c.items.map(it=>it.t!=null?rh[it.t]:`<div class="pgrp"><b>${src.opts[it.cat]}</b><ul id="p${i}c${it.cat}"></ul></div>`).join('')+'</div>').join('')+'</div>';
+    }else h+=rh.join('');
+  });
+  h+=`<div class="actions"><button class="btn" type="button" data-v>Verifica esercizio</button>
+      <button class="btn sec hide" type="button" data-n>${i<EX.length-1?'Esercizio successivo →':'Vai alla valutazione finale →'}</button></div>
+      <div class="result hide" aria-live="polite"></div>`;
+  c.innerHTML=h; main.appendChild(c);
+  c.querySelector('[data-v]').onclick=()=>verify(i);
+  c.addEventListener('change',()=>upd(i)); upd(i);
+  c.querySelector('[data-n]').onclick=()=>show(i+1);
+});
+const fin=document.createElement('section'); fin.className='card final hide'; fin.id='ex'+EX.length; main.appendChild(fin);
+const fb=document.createElement('button'); fb.type='button'; fb.textContent='Valutazione finale'; fb.onclick=()=>show(EX.length); steps.appendChild(fb);
+
+function upd(i,sol){
+  const ex=EX[i];
+  ex.secs.forEach((s,j)=>{
+    if(s.uniq){
+      const sels=s.rows.map((r,k)=>document.querySelector(`#e${i}s${j}r${k} select`));
+      const used=sels.map(x=>x.value);
+      sels.forEach(x=>[...x.options].forEach(o=>{o.disabled=!!o.value&&o.value!==x.value&&used.includes(o.value)}));
+    }
+    if(s.prosp){
+      const src=ex.secs[s.prosp.src], lists=src.opts.map(()=>[]);
+      src.rows.forEach((r,k)=>{
+        const ck=document.querySelector(`#e${i}s${s.prosp.src}r${k} input:checked`);
+        const c=src.opts.indexOf(sol?r.a:ck?ck.value:'');
+        if(c>=0) lists[c].push(`<li><span>${r.q}</span><span>${eur(r.amt)}</span></li>`);
+      });
+      lists.forEach((l,c)=>{document.getElementById(`p${i}c${c}`).innerHTML=l.join('')||'<li class="empty">nessuna voce</li>'});
+      if(sol) document.getElementById('pn'+i).textContent='Prospetto con le voci nella posizione corretta:';
+    }
+  });
+}
+function parseNum(v){ v=v.replace(/[^\d,-]/g,'').replace(',','.'); return v===''?null:Math.round(parseFloat(v)); }
+
+function verify(i){
+  const ex=EX[i], card=document.getElementById('ex'+i); let score=0; const errs=[];
+  ex.secs.forEach((s,j)=>s.rows.forEach((r,k)=>{
+    const id=`e${i}s${j}r${k}`, row=document.getElementById(id); let given, ok, gtxt, ctxt;
+    if(s.type==='pills'){
+      const sel=[...row.querySelectorAll('input:checked')].map(x=>x.value);
+      if(s.multi){ ok=sel.length===r.a.length&&r.a.every(x=>sel.includes(x)); gtxt=sel.join(' + '); ctxt=r.a.join(' + '); }
+      else{ ok=sel[0]===r.a; gtxt=sel[0]||''; ctxt=r.a; }
+    }else if(s.type==='select'){
+      given=row.querySelector('select').value; ok=given===r.a; gtxt=given; ctxt=r.a;
+    }else{
+      given=parseNum(row.querySelector('input').value); ok=given===r.a; gtxt=given==null?'':eur(given)+' €'; ctxt=eur(r.a)+' €';
+    }
+    row.classList.add(ok?'ok':'ko');
+    const f=row.querySelector('.fb'); f.classList.remove('hide');
+    f.textContent=ok?'✓ Corretto':'✗ Errato — risposta corretta: '+ctxt;
+    if(ok) score++; else errs.push({q:r.q,g:gtxt,c:ctxt,why:r.why});
+  }));
+  card.querySelectorAll('input,select').forEach(x=>x.disabled=true);
+  card.querySelector('[data-v]').classList.add('hide');
+  card.querySelector('[data-n]').classList.remove('hide');
+  res[i]={score,errs}; upd(i,true);
+  const cls=score===ex.max?'full':score/ex.max>=.6?'part':'bad';
+  const box=card.querySelector('.result'); box.className='result '+cls;
+  let h=`<h4>Risultato: ${score} / ${ex.max} punti (${Math.round(score/ex.max*100)}%)</h4>`;
+  if(!errs.length) h+='Esercizio svolto correttamente, senza errori.';
+  else{
+    h+=`<b>${errs.length===1?'1 errore commesso':errs.length+' errori commessi'}:</b><ul>`+errs.map(e=>
+      `<li>${e.q}<br><span class="y">Tua risposta: ${e.g?esc(e.g):'nessuna risposta'}</span> · <span class="c">Corretta: ${esc(e.c)}</span>${e.why?`<span class="why">${e.why}</span>`:''}</li>`).join('')+'</ul>';
+  }
+  box.innerHTML=h; box.scrollIntoView({behavior:'smooth',block:'nearest'});
+  nav();
+}
+
+function nav(){
+  const done=res.filter(Boolean).length;
+  [...steps.children].forEach((b,i)=>{
+    b.className='';
+    if(i<EX.length){
+      if(res[i]) b.className='done'+(res[i].score<EX[i].max?' part':'');
+      b.disabled=!(res[i]||i===0||res[i-1]);
+    }else b.disabled=done<EX.length;
+    if(i===cur) b.classList.add('cur');
+  });
+  bar.style.width=(done/EX.length*100)+'%';
+}
+
+function show(i){
+  cur=i; if(i===EX.length) finale();
+  [...main.children].forEach((c,k)=>c.classList.toggle('hide',k!==i));
+  nav(); window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function finale(){
+  const tot=res.reduce((s,r)=>s+r.score,0), max=EX.reduce((s,e)=>s+e.max,0), pct=tot/max;
+  const voto=Math.max(1,Math.round(pct*20)/2);
+  const full=res.filter((r,i)=>r.score===EX[i].max).length;
+  const giud=voto>=9?'Ottimo: preparazione completa e sicura.':voto>=8?'Buono: conoscenze solide, con poche imprecisioni.':
+    voto>=7?'Discreto: preparazione adeguata, da consolidare in alcuni punti.':voto>=6?'Sufficiente: obiettivi minimi raggiunti.':
+    voto>=5?'Insufficiente non grave: sono presenti lacune da recuperare.':'Gravemente insufficiente: è necessario ripassare l’intero argomento.';
+  const weak=EX.map((e,i)=>({e,p:res[i].score/e.max})).filter(x=>x.p<.6).map(x=>x.e.short);
+  const nome=document.getElementById('stud').value.trim();
+  FIN={tot,max,pct,voto,giud,full,nome};
+  fin.innerHTML=`<h2>Valutazione finale</h2>${nome?`<div class="pts">Studente: ${esc(nome)}</div>`:''}
+   <div class="vote"><div class="big">${String(voto).replace('.',',')}<small>/10</small></div>
+   <div><b>${giud}</b><br>Punteggio: ${tot} / ${max} (${Math.round(pct*100)}%)<br>
+   Esercizi svolti in modo completamente corretto: <b>${full} su ${EX.length}</b></div></div>
+   ${weak.length?`<div class="istr">Da ripassare: ${weak.join(', ')}.</div>`:''}
+   <table><thead><tr><th>Esercizio</th><th class="r">Punti</th><th class="r">Errori</th><th>Esito</th></tr></thead><tbody>
+   ${EX.map((e,i)=>{const r=res[i],c=r.score===e.max?'full':r.score/e.max>=.6?'part':'bad';
+     return `<tr><td>${i+1}. ${e.short}</td><td class="r">${r.score} / ${e.max}</td><td class="r">${r.errs.length}</td>
+     <td><span class="tag ${c}">${c==='full'?'Corretto':c==='part'?'Parzialmente corretto':'Insufficiente'}</span></td></tr>`}).join('')}
+   </tbody></table>
+   <p class="legend" style="margin-top:14px">Voto = punteggio percentuale in decimi, arrotondato al mezzo voto. Sufficienza al 60%. Clicca su un esercizio in alto per rivedere le correzioni.</p>
+   <div class="actions"><button class="btn" type="button" id="pdfbtn">Salva i risultati in PDF</button>
+   <button class="btn sec" type="button" onclick="location.reload()">Ricomincia la verifica</button></div><div id="pdfmsg" aria-live="polite"></div>`;
+  document.getElementById('pdfbtn').onclick=savePdf;
+}
+let FIN=null;
+const dlP=window.claude&&window.claude.use?window.claude.use('downloads').catch(()=>null):Promise.resolve(null);
+async function savePdf(){
+  const msg=document.getElementById('pdfmsg'), J=window.jspdf&&window.jspdf.jsPDF;
+  if(!J){msg.textContent='Libreria PDF non caricata: controlla la connessione a Internet e riprova.';return}
+  const d=new J({unit:'mm',format:'a4'}), L=15, W=180; let y=20;
+  const san=t=>String(t).replace(/<[^>]+>/g,'').replace(/[’‘]/g,"'").replace(/[“”]/g,'"').replace(/→/g,'->').replace(/[−–—]/g,'-').replace(/…/g,'...').replace(/€/g,'euro').replace(/·/g,'-');
+  const line=(t,size=10,style='normal',gap=1.5,x=L)=>{d.setFont('helvetica',style);d.setFontSize(size);
+    d.splitTextToSize(san(t),W-(x-L)).forEach(l=>{if(y>282){d.addPage();y=20}d.text(l,x,y);y+=size*0.45});y+=gap};
+  const f=FIN, oggi=new Date().toLocaleString('it-IT',{dateStyle:'long',timeStyle:'short'});
+  line('La gestione aziendale - Verifica',16,'bold',2);
+  line('Studente: '+(f.nome||'____________________')+'     Data: '+oggi,10,'normal',4);
+  line('Voto: '+String(f.voto).replace('.',',')+' / 10',20,'bold',2);
+  line(f.giud,11,'bold');
+  line(`Punteggio: ${f.tot} / ${f.max} (${Math.round(f.pct*100)}%)`);
+  line(`Esercizi svolti in modo completamente corretto: ${f.full} su ${EX.length}`,10,'normal',5);
+  line('Riepilogo',12,'bold',2);
+  EX.forEach((e,i)=>{const r=res[i];line(`${i+1}. ${e.short}: ${r.score} / ${e.max} punti - ${r.errs.length?r.errs.length+(r.errs.length===1?' errore':' errori'):'nessun errore'}`,10,'normal',.8)});
+  y+=4; line('Dettaglio degli errori',12,'bold',2);
+  EX.forEach((e,i)=>{const r=res[i];
+    line(`${e.title} - ${r.score} / ${e.max}`,10.5,'bold',1.2);
+    if(!r.errs.length) line('Nessun errore.',9.5,'normal',3,L+4);
+    r.errs.forEach(x=>{line('- '+x.q,9.5,'normal',.5,L+4);
+      line(`Risposta data: ${x.g||'nessuna risposta'}   |   Risposta corretta: ${x.c}`,9.5,'italic',x.why?.5:2,L+7);
+      if(x.why) line(x.why,9,'normal',2,L+7)});
+    y+=1.5});
+  const fn='verifica-gestione-aziendale'+(f.nome?'-'+f.nome.toLowerCase().normalize('NFD').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,''):'')+'.pdf';
+  try{
+    const dl=await dlP;
+    if(dl){await dl.save({filename:fn,data:d.output('blob')});}
+    else d.save(fn);
+    msg.textContent='PDF salvato: '+fn;
+  }catch(e){
+    msg.textContent=e&&e.code==='declined'?'Salvataggio annullato.':'Non è stato possibile salvare il PDF da questa finestra.';
+  }
+}
+show(0);
+</script>
+</body>
+</html>
